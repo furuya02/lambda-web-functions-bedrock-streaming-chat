@@ -1,0 +1,16 @@
+# 依存パッケージ・ビルド成果物
+node_modules/
+dist/
+
+# CDK の出力（テンプレートに Basic 認証のパスワードが平文で入るので、公開しない）
+cdk.out/
+cdk.context.json
+
+# 認証情報・環境変数
+.env
+.env.*
+
+# その他
+*.zip
+*.log
+.DS_Store
