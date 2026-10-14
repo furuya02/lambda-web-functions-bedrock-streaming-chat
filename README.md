@@ -29,7 +29,7 @@ Browser ─ HTTPS (Basic auth) ─ Lambda Web Functions (Hono)
 
 | Directory | Contents |
 |---|---|
-| app/ | Hono app (app/src/index.ts), bundled into app/dist/index.js with esbuild |
+| app/ | Hono app (server: app/src/index.ts, chat page: app/src/index.html). esbuild bundles the server into app/dist/index.js and index.html is copied next to it |
 | cdk/ | CDK (S3 bucket, execution role, Web Function, revision, endpoint) |
 
 ## Requirements
@@ -45,7 +45,7 @@ Browser ─ HTTPS (Basic auth) ─ Lambda Web Functions (Hono)
 git clone https://github.com/furuya02/lambda-web-functions-bedrock-streaming-chat.git
 cd lambda-web-functions-bedrock-streaming-chat
 
-# Build the app (bundled into a single file: app/dist/index.js)
+# Build the app (app/dist/index.js + app/dist/index.html)
 pnpm -C app install
 pnpm -C app build
 

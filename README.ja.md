@@ -29,7 +29,7 @@ Lambda 用のハンドラーやアダプター（Lambda Web Adapter）は使わ�
 
 | ディレクトリ | 内容 |
 |---|---|
-| app/ | Hono アプリ（app/src/index.ts）。esbuild で app/dist/index.js にまとめる |
+| app/ | Hono アプリ（サーバー: app/src/index.ts、チャット画面: app/src/index.html）。esbuild でサーバーを app/dist/index.js にまとめ、index.html をその隣にコピーする |
 | cdk/ | CDK（S3 バケット、実行ロール、Web Function、リビジョン、エンドポイント） |
 
 ## 必要要件
@@ -45,7 +45,7 @@ Lambda 用のハンドラーやアダプター（Lambda Web Adapter）は使わ�
 git clone https://github.com/furuya02/lambda-web-functions-bedrock-streaming-chat.git
 cd lambda-web-functions-bedrock-streaming-chat
 
-# アプリをビルド（app/dist/index.js が 1 ファイルで作られる）
+# アプリをビルド（app/dist/index.js と app/dist/index.html が作られる）
 pnpm -C app install
 pnpm -C app build
 
