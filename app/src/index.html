@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- チャット画面（最小限）。会話の履歴はブラウザ側で持ち、毎回まとめて送る -->
+<html lang="ja">
+<meta charset="utf-8">
+<title>Bedrock Streaming Chat</title>
+<style>
+  body { font-family: sans-serif; max-width: 720px; margin: 2rem auto; }
+  #log div { margin: .5rem 0; padding: .5rem; border-radius: 6px; }
+  .user { background: #e8f0fe; white-space: pre-wrap; } .assistant { background: #f1f3f4; }
+  form { display: flex; gap: .5rem; } textarea { flex: 1; height: 3rem; }
+</style>
+<!-- 回答の Markdown を HTML にする（marked）。モデルの出力をそのまま HTML にすると危険なので、DOMPurify で無害化する -->
+<!-- integrity（SRI）: CDN のファイルが改ざんされていたら、ブラウザが実行しない -->
+<script src="https://cdn.jsdelivr.net/npm/marked@18.1.1/lib/marked.umd.js" integrity="sha384-rATToyt6602Jnq8c7w8HZwmyOUgPL7mzxX01FBWoV48ns/EgkakGozpES+PnaYOI" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.17/dist/purify.min.js" integrity="sha384-P0JNneQf81HOl9VwNXK76cQ9VMD6Nfsnepxb0cCOg8+UzEdzgPHAPV4wVQrvYQSx" crossorigin="anonymous"></script>
+<h1>Bedrock Streaming Chat</h1>
+<div id="log"></div>
+<form id="f"><textarea id="q"></textarea><button>送信</button></form>
+<script>
+  const messages = []
+  const add = (role, text) => {
+    const div = document.createElement('div')
+    div.className = role
+    div.textContent = text
+    document.getElementById('log').append(div)
+    return div
+  }
+  document.getElementById('f').onsubmit = async (e) => {
+    e.preventDefault()
+    const q = document.getElementById('q')
+    messages.push({ role: 'user', content: [{ text: q.value }] })
+    add('user', q.value)
+    q.value = ''
+    const div = add('assistant', '')
+    // 応答を少しずつ読み、届いた分から画面に足していく
+    const res = await fetch('/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ messages }) })
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let text = ''
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      text += decoder.decode(value, { stream: true })
+      // 届くたびに、それまでの全文を Markdown として描画し直す
+      div.innerHTML = DOMPurify.sanitize(marked.parse(text))
+    }
+    messages.push({ role: 'assistant', content: [{ text }] })
+  }
+</script>
+</html>

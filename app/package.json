@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx src/index.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node24 --format=cjs --outfile=dist/index.js"
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node24 --format=cjs --outfile=dist/index.js && cp src/index.html dist/"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1151.0",

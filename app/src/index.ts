@@ -5,7 +5,12 @@ import { Hono } from 'hono'
 import { basicAuth } from 'hono/basic-auth'
 import { streamText } from 'hono/streaming'
 import { serve } from '@hono/node-server'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { BedrockRuntimeClient, ConverseStreamCommand, type Message } from '@aws-sdk/client-bedrock-runtime'
+
+// チャット画面（index.html）は、起動時に 1 回だけ読み込んでおく
+const HTML = readFileSync(path.join(__dirname, 'index.html'), 'utf8')
 
 const MODEL_ID = process.env.MODEL_ID ?? 'jp.anthropic.claude-haiku-4-5-20251001-v1:0'
 
@@ -50,54 +55,3 @@ app.post('/chat', async (c) => {
 // Lambda が待ち受け先を AWS_LAMBDA_HTTP_ENDPOINT（host:port）で渡してくる。ローカルでは 3000 番で待ち受ける
 const [hostname, port] = (process.env.AWS_LAMBDA_HTTP_ENDPOINT ?? 'localhost:3000').split(':')
 serve({ fetch: app.fetch, hostname, port: Number(port) }, () => console.log(`listening on ${hostname}:${port}`))
-
-// チャット画面（最小限）。会話の履歴はブラウザ側で持ち、毎回まとめて送る
-const HTML = `<!doctype html>
-<html lang="ja">
-<meta charset="utf-8">
-<title>Bedrock Streaming Chat</title>
-<style>
-  body { font-family: sans-serif; max-width: 720px; margin: 2rem auto; }
-  #log div { margin: .5rem 0; padding: .5rem; border-radius: 6px; }
-  .user { background: #e8f0fe; white-space: pre-wrap; } .assistant { background: #f1f3f4; }
-  form { display: flex; gap: .5rem; } textarea { flex: 1; height: 3rem; }
-</style>
-<!-- 回答の Markdown を HTML にする（marked）。モデルの出力をそのまま HTML にすると危険なので、DOMPurify で無害化する -->
-<!-- integrity（SRI）: CDN のファイルが改ざんされていたら、ブラウザが実行しない -->
-<script src="https://cdn.jsdelivr.net/npm/marked@18.1.1/lib/marked.umd.js" integrity="sha384-rATToyt6602Jnq8c7w8HZwmyOUgPL7mzxX01FBWoV48ns/EgkakGozpES+PnaYOI" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.17/dist/purify.min.js" integrity="sha384-P0JNneQf81HOl9VwNXK76cQ9VMD6Nfsnepxb0cCOg8+UzEdzgPHAPV4wVQrvYQSx" crossorigin="anonymous"></script>
-<h1>Bedrock Streaming Chat</h1>
-<div id="log"></div>
-<form id="f"><textarea id="q"></textarea><button>送信</button></form>
-<script>
-  const messages = []
-  const add = (role, text) => {
-    const div = document.createElement('div')
-    div.className = role
-    div.textContent = text
-    document.getElementById('log').append(div)
-    return div
-  }
-  document.getElementById('f').onsubmit = async (e) => {
-    e.preventDefault()
-    const q = document.getElementById('q')
-    messages.push({ role: 'user', content: [{ text: q.value }] })
-    add('user', q.value)
-    q.value = ''
-    const div = add('assistant', '')
-    // 応答を少しずつ読み、届いた分から画面に足していく
-    const res = await fetch('/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ messages }) })
-    const reader = res.body.getReader()
-    const decoder = new TextDecoder()
-    let text = ''
-    for (;;) {
-      const { done, value } = await reader.read()
-      if (done) break
-      text += decoder.decode(value, { stream: true })
-      // 届くたびに、それまでの全文を Markdown として描画し直す
-      div.innerHTML = DOMPurify.sanitize(marked.parse(text))
-    }
-    messages.push({ role: 'assistant', content: [{ text }] })
-  }
-</script>
-</html>`
