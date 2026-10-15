@@ -90,7 +90,7 @@ export class ChatStack extends Stack {
       functionName: fn.ref,
       endpointName: 'prod',
       endpointType: 'HomeRegion', // 東京リージョンだけで動かす
-      // ブラウザは SigV4 で署名できないので、アプリ側で認証する（Basic 認証）。この設定だけだと誰でも届く点に注意
+      // ブラウザで開くだけでは SigV4 の署名が付かないので、アプリ側で認証する（Basic 認証）。この設定だけだと誰でも届く点に注意
       authType: 'ApplicationManaged',
       revisionWeights: [{ revisionId: revision.attrRevisionId, weight: 100 }],
       // 費用の上限を抑えるため、流量（秒間リクエスト数）と実行環境の数に上限を付ける
