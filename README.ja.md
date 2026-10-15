@@ -76,6 +76,8 @@ curl -N -u user:<パスワード> -X POST <Url>chat \
 AWS_REGION=ap-northeast-1 pnpm -C app dev   # http://localhost:3000/（ユーザー名 user / パスワード pass）
 ```
 
+VS Code でデバッグする場合は、このフォルダを開いて F5（.vscode/launch.json の「app (tsx)」）で起動し、app/src/index.ts にブレークポイントを置きます。
+
 ## 注意
 
 - エンドポイントは ApplicationManaged（アプリ側で認証）なので、URL を知っていれば誰でも届きます。Basic 認証は検証用の最小限の守りです。本番で使う場合は、CloudFront + OAC や別の認証方式を検討してください
