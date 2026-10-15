@@ -76,6 +76,8 @@ curl -N -u user:<password> -X POST <Url>chat \
 AWS_REGION=ap-northeast-1 pnpm -C app dev   # http://localhost:3000/ (user: user / password: pass)
 ```
 
+To debug in VS Code, open this folder and press F5 ("app (tsx)" in .vscode/launch.json), then set breakpoints in app/src/index.ts.
+
 ## Notes
 
 - The endpoint uses ApplicationManaged auth, so anyone who knows the URL can reach it. Basic auth is a minimal guard for testing. For production, consider CloudFront + OAC or another authentication method
